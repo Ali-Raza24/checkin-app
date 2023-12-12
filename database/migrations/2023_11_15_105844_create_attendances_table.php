@@ -18,7 +18,6 @@ return new class extends Migration
             )->onDelete('cascade');
             $table->dateTime('checkin_time')->nullable();
             $table->dateTime('checkout_time')->nullable();
-            $table->integer('mode')->nullable();
             $table->timestamps();
         });
     }
