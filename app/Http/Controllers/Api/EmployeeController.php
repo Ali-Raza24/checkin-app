@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EmployeeCollection;
+use App\Models\Attendance;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 
@@ -32,10 +33,13 @@ class EmployeeController extends Controller
         ]);
     }
 
-    public function view($id)
+    public function view(Request $request, $id)
     {
-        $employeeDetails = Employee::with('attendances')->findOrFail($id);
-        return response()->json(['employee' => $employeeDetails]);
+        $query = Attendance::where('emp_code',$id);
+        $order = $request->input('order', "created_at");
+        $direction = $request->input('direction', "desc");
+        $employeesAttendaces = $this->filters($request,$query)->orderBy($order,$direction)->paginate(10);
+        return response()->json(['employee_attendance' => $employeesAttendaces]);
     }
 
     private  function filters(Request $request,$query)
@@ -47,15 +51,23 @@ class EmployeeController extends Controller
         }
 
         if ($model->hasStartDate($request)) {
-            $query->whereHas('attendances', function ($q) use ($request) {
-                $q->whereDate('checkin_time', $request->get('start_date'));
-            });
+            if ($request->get('is_attendance')) {
+                $query->whereDate('checkin_time', $request->get('start_date'));
+            }else{
+                $query->whereHas('attendances', function ($q) use ($request) {
+                    $q->whereDate('checkin_time', $request->get('start_date'));
+                });
+            }
         }
 
         if ($model->hasStartAndEndDate($request)) {
-            $query->whereHas('attendances', function ($q) use ($request) {
-                $q->whereBetween('checkin_time' ,[$request->get('start_date'), $request->get('end_date')]);
-            });
+            if ($request->get('is_attendance')) {
+                $query->whereBetween('checkin_time' ,[$request->get('start_date'), $request->get('end_date')]);
+            }else{
+                $query->whereHas('attendances', function ($q) use ($request) {
+                    $q->whereBetween('checkin_time' ,[$request->get('start_date'), $request->get('end_date')]);
+                });
+            }
         }
 
         return  $query;
