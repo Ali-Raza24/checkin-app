@@ -62,10 +62,12 @@ class EmployeeController extends Controller
 
         if ($model->hasStartAndEndDate($request)) {
             if ($request->get('is_attendance')) {
-                $query->whereBetween('checkin_time' ,[$request->get('start_date'), $request->get('end_date')]);
+                $query->whereDate('checkin_time', '>=', $request->get('start_date'))
+                    ->whereDate('checkin_time', '<=',  $request->get('end_date'));
             }else{
                 $query->whereHas('attendances', function ($q) use ($request) {
-                    $q->whereBetween('checkin_time' ,[$request->get('start_date'), $request->get('end_date')]);
+                    $q->whereDate('checkin_time', '>=', $request->get('start_date'))
+                    ->whereDate('checkin_time', '<=',  $request->get('end_date'));
                 });
             }
         }
