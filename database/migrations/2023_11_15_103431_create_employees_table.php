@@ -14,6 +14,14 @@ return new class extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('email');
+            $table->string('contact_number');
+            $table->date('dob')->nullable();
+            $table->timestamp('join_date')->nullable();
+            $table->string('probation_period')->nullable();
+            $table->string('designation')->nullable();
+            $table->string('line_manager')->nullable();
+            $table->enum('gender', ['male', 'female', 'other'])->default(null);
             $table->timestamps();
         });
     }
