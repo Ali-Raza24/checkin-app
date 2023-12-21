@@ -24,7 +24,7 @@ use PHPUnit\Framework\Attributes\Group;
 
 Route::post('login',[AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function (){
+// Route::middleware('auth:sanctum')->group(function (){
 
     Route::controller(EmployeeController::class)->group(function () {
         Route::post('employee-store', 'store');
@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::get('attendances', 'index');
         Route::post('attendance-store', 'store');
     });
-});
+// });
 
 
 

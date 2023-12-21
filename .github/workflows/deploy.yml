@@ -1,0 +1,36 @@
+name: Deploy
+on:
+  push:
+    branches: [ master ]
+    
+jobs:
+  web-deploy:
+    name: Deploying...
+    runs-on: ubuntu-latest
+    steps:
+    - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+      with:
+        php-version: '8.1'
+    - uses: actions/checkout@v3
+
+    - name: install ssh keys
+      env:
+        SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        touch ~/.ssh/github_action.key
+        ssh-keyscan ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+        echo "$SSH_KEY" > ~/.ssh/github_action.key
+        chmod 600 ~/.ssh/github_action.key
+
+    - name: connect and pull
+      run: |
+       scp -i ~/.ssh/github_action.key -o StrictHostKeyChecking=no . ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/n4mrcfw4g2c0/public_html/checkin.isoft-tech.com "
+       cd /home/n4mrcfw4g2c0/public_html/checkin.isoft-tech.com
+
+       composer update
+       php artisan migrate
+       php artisan optimize:clear"
+       
+    - name: cleanup
+      run: rm -rf ~/.ssh
