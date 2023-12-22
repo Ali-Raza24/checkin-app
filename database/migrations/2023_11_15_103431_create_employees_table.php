@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('probation_period')->nullable();
             $table->string('designation')->nullable();
             $table->string('line_manager')->nullable();
-            $table->enum('gender', ['male', 'female', 'other'])->default(null);
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
             $table->timestamps();
         });
     }

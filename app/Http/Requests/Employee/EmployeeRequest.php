@@ -27,7 +27,7 @@ class EmployeeRequest extends FormRequest
     {
         return [
             'name' => 'bail|required|string|max:255',
-            'gender' => 'bail|in:male,female,other',
+            'gender' => 'bail|nullable|in:male,female,other',
             'email' => 'bail|required|email:rfc,dns|unique:employees,email',
             'dob' => 'bail|nullable|date|date_format:Y-m-d',
             'join_date' => 'bail|nullable|date',
