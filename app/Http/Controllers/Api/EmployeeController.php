@@ -39,8 +39,9 @@ class EmployeeController extends Controller
         $query = Attendance::where('emp_code', $id);
         $order = $request->input('order', "created_at");
         $direction = $request->input('direction', "desc");
+        $employee = Employee::find($id);
         $employeesAttendaces = $this->filters($request, $query)->orderBy($order, $direction)->paginate(10);
-        return response()->json(['employee_attendance' => $employeesAttendaces]);
+        return response()->json(['employee' => $employee,'employee_attendance' => $employeesAttendaces]);
     }
 
     private  function filters(Request $request, $query)
