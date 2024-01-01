@@ -7,16 +7,23 @@ use App\Http\Requests\Employee\EmployeeRequest;
 use App\Http\Resources\EmployeeCollection;
 use App\Models\Attendance;
 use App\Models\Employee;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Employee::with('attendances');
-        $order = $request->input('order', "created_at");
+        $order = $request->input('order', "employees.created_at");
         $direction = $request->input('direction', "desc");
-        $employees = $this->filters($request, $query)->orderBy($order, $direction)->paginate(10);
+
+        $employees = Employee::search($request->get('search'))
+                        ->query(function(Builder $builder) {
+                            $builder->join('attendances', 'attendances.emp_code', '=', 'employees.id');
+                            $builder->select('employees.*');
+                        })
+                        ->orderBy($order, $direction)
+                        ->paginate(10);
 
         return EmployeeCollection::collection($employees);
     }
@@ -44,36 +51,5 @@ class EmployeeController extends Controller
         return response()->json(['employee' => $employee,'employee_attendance' => $employeesAttendaces]);
     }
 
-    private  function filters(Request $request, $query)
-    {
-        $model = new Employee();
 
-        if ($request->has('name') && $request->get('name') !== "null") {
-            $query->where('name', 'LIKE', '%' . $request->get('name') . '%');
-        }
-
-        if ($model->hasStartDate($request)) {
-            if ($request->get('is_attendance')) {
-                $query->whereDate('checkin_time', $request->get('start_date'));
-            } else {
-                $query->whereHas('attendances', function ($q) use ($request) {
-                    $q->whereDate('checkin_time', $request->get('start_date'));
-                });
-            }
-        }
-
-        if ($model->hasStartAndEndDate($request)) {
-            if ($request->get('is_attendance')) {
-                $query->whereDate('checkin_time', '>=', $request->get('start_date'))
-                    ->whereDate('checkin_time', '<=',  $request->get('end_date'));
-            } else {
-                $query->whereHas('attendances', function ($q) use ($request) {
-                    $q->whereDate('checkin_time', '>=', $request->get('start_date'))
-                        ->whereDate('checkin_time', '<=',  $request->get('end_date'));
-                });
-            }
-        }
-
-        return  $query;
-    }
 }

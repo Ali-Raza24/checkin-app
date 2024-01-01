@@ -22,7 +22,7 @@ class EmployeeCollection extends JsonResource
             'checkin_time' => $this->getCheckinTimes(),
             'checkout_time' => $this->getCheckoutTimes(),
             'hours' => $this->getDiffInHours(),
-            'date' => $this->created_at
+            'date' => $this->created_at,
         ];
     }
 
